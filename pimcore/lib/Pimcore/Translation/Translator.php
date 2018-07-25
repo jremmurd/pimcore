@@ -36,7 +36,7 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
     /**
      * @var bool
      */
-    private $caseInsensitive = false;
+    protected $caseInsensitive = false;
 
     /**
      * @var array
@@ -151,8 +151,16 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
 
         return strtr($term, $parameters);
     }
-
-    private function getFromCatalogue(MessageCatalogueInterface $catalogue, $id, $domain, $locale)
+    
+    /**
+     * @param MessageCatalogueInterface $catalogue
+     * @param $id
+     * @param $domain
+     * @param $locale
+     * @return string
+     * @throws \Exception
+     */
+    protected function getFromCatalogue(MessageCatalogueInterface $catalogue, $id, $domain, $locale)
     {
         $originalId = $id;
         if ($this->caseInsensitive && in_array($domain, ['messages', 'admin'])) {
@@ -441,5 +449,13 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
     public function __call($method, $args)
     {
         return call_user_func_array([$this->translator, $method], $args);
+    }
+    
+     /**
+     * @return bool
+     */
+    public function isCaseInsensitive(): bool
+    {
+        return $this->caseInsensitive;
     }
 }
