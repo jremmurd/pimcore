@@ -385,9 +385,16 @@ abstract class AbstractElasticSearch extends Worker\AbstractMockupCacheWorker im
 
     protected function doUpdateIndex($objectId, $data = null)
     {
-        if (empty($data)) {
+         if (empty($data)) {
             $data = $this->db->fetchOne('SELECT data FROM ' . $this->getStoreTableName() . ' WHERE o_id = ? AND tenant = ?', [$objectId, $this->name]);
-            $data = json_decode($data, true);
+            if ($data) {
+                $data = json_decode($data, true);
+
+                $jsonDecodeError = json_last_error();
+                if ($jsonDecodeError !== JSON_ERROR_NONE) {
+                    throw new \Exception("Could not decode store data for updating index - maybe there is invalid json data. Json decode error code was {$jsonDecodeError}, ObjectId was {$objectId}.");
+                }
+            }
         }
 
         if ($data) {
