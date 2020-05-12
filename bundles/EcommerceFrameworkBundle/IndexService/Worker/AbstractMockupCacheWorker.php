@@ -90,7 +90,7 @@ abstract class AbstractMockupCacheWorker extends AbstractBatchProcessingWorker
         $result = Cache::load($key);
 
         if ($success && $result) {
-            $this->db->executeTransactionalQuery('UPDATE ' . $this->getStoreTableName() . ' SET crc_index = crc_current WHERE o_id = ? and tenant = ?', [$objectId, $this->name]);
+            $this->executeTransactionalQuery('UPDATE ' . $this->getStoreTableName() . ' SET crc_index = crc_current WHERE o_id = ? and tenant = ?', [$objectId, $this->name]);
         } else {
             Logger::err("Element with ID $objectId could not be added to mockup-cache");
         }
