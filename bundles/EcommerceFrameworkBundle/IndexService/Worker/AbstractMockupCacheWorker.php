@@ -90,7 +90,7 @@ abstract class AbstractMockupCacheWorker extends AbstractBatchProcessingWorker
         $result = Cache::load($key);
 
         if ($success && $result) {
-            $this->db->query('UPDATE ' . $this->getStoreTableName() . ' SET crc_index = crc_current WHERE o_id = ? and tenant = ?', [$objectId, $this->name]);
+            $this->db->executeTransactionalQuery('UPDATE ' . $this->getStoreTableName() . ' SET crc_index = crc_current WHERE o_id = ? and tenant = ?', [$objectId, $this->name]);
         } else {
             Logger::err("Element with ID $objectId could not be added to mockup-cache");
         }
@@ -124,5 +124,34 @@ abstract class AbstractMockupCacheWorker extends AbstractBatchProcessingWorker
         Logger::info("Element with ID $objectId was not found in cache, trying to put it there.");
 
         return $this->saveToMockupCache($objectId);
+    }
+    
+    /**
+     * @param string $query
+     * @param null $params
+     * @param int $maxTries
+     * @param int $waitTimeout
+     * @return bool
+     * @throws \Exception
+     */
+    protected function executeTransactionalQuery(string $query, $params = null, int $maxTries = 3, float $waitTimeout = 1)
+    {
+        $this->db->beginTransaction();
+        for ($i = 1; $i <= $maxTries; $i++) {
+            try {
+                $this->db->query($query, $params);
+                $result = $this->db->commit();
+                break;
+            } catch (\Exception $e) {
+                $this->db->rollBack();
+                Logger::info($e);
+                if ($i === $maxTries) {
+                    throw $e;
+                }
+                sleep($waitTimeout);
+            }
+        }
+
+        return $result;
     }
 }
