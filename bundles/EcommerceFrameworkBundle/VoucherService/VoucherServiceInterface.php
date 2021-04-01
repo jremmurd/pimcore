@@ -84,7 +84,7 @@ interface VoucherServiceInterface
      *
      * @return PricingManagerTokenInformation[]
      */
-    public function getPricingManagerTokenInformationDetails(CartInterface $cart, string $locale = null): array;
+    public function getPricingManagerTokenInformationDetails(CartInterface $cart, string $locale = null, bool $considerItemRules = true): array;
 
     /**
      * Cleans the token reservations due to sysConfig duration settings, if no series Id is
