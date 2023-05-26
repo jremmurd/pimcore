@@ -86,7 +86,9 @@ class MaintenancePageListener
         if (!is_file($file)) {
             return;
         }
-
+        
+        $request->attributes->set('pimcore_targeting_debug', false);
+        
         $conf = include($file);
         if (isset($conf['sessionId'])) {
             $requestSessionId = Session::getSessionId();
